@@ -1,7 +1,9 @@
 package br.com.devmedia.reflection.example.exec.action;
 
 import br.com.devmedia.reflection.example.action.ActionSupport;
+import br.com.devmedia.reflection.example.action.annotation.Action;
 
+@Action(actionName="home")
 public class HomeAction extends ActionSupport{
 	
 	public String init(){
