@@ -123,4 +123,34 @@ public class QueryGenerator {
 		this.fields.add(isData(o));
 		return selectById.toString();
 	}
+	public String createSelectByFk(Class<?> clazzAssociate, String fieldFK,
+			Class<?> clazzReturn) throws DevMediaExceptionMap {
+		StringBuilder queryFK= createQuerywhitiJoin(clazzAssociate, clazzReturn);
+		Field fieldPK=getFieldPK(clazzAssociate);
+		queryFK.append(" p.").append(fieldFK).append("=").append("s."+fieldPK.getAnnotation(Column.class).name());
+		queryFK.append(" AND p."+getFieldPK(clazzReturn).getAnnotation(Column.class).name()+"=?");
+		return queryFK.toString();
+	}
+	private Field getFieldPK(Class<?> clazz) throws DevMediaExceptionMap {
+		List<Field> fields=ReflectionUtil.getFieldsWhithAnnotation(clazz.getDeclaredFields(), Id.class);
+		if(fields.isEmpty()|| fields.size()!=1){
+			throw new DevMediaExceptionMap("A classe usada não está anotada da maneira correta");
+		}
+		return fields.get(0);
+	}
+	public String createSelectTheOneToMany(Class<?> clazzAssociate, String fieldFK,
+			Class<?> clazzReturn) throws DevMediaExceptionMap {
+		StringBuilder queryOneToMany=createQuerywhitiJoin(clazzAssociate, clazzReturn);
+		Field fieldFoK=getFieldPK(clazzReturn);
+		queryOneToMany.append(" s.").append(fieldFK).append("=").append("p."+fieldFoK.getAnnotation(Column.class).name());
+		queryOneToMany.append(" AND p."+fieldFoK.getAnnotation(Column.class).name()+"=?");
+		return queryOneToMany.toString();
+	}
+	private StringBuilder createQuerywhitiJoin(Class<?> clazzAssociate,
+			Class<?> clazzReturn) {
+		StringBuilder queryJoinTwoTables= new StringBuilder("SELECT s.* FROM ");
+		queryJoinTwoTables.append(((Table)clazzAssociate.getAnnotation(Table.class)).name()).append(" s, ");
+		queryJoinTwoTables.append(((Table)clazzReturn.getAnnotation(Table.class)).name()).append(" p WHERE");
+		return queryJoinTwoTables;
+	}
 }
